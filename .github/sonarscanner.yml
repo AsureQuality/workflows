@@ -1,0 +1,35 @@
+# This workflow will run any security checks against the code base on pushes to master as well as on pull requests.
+
+on:
+  workflow_call:
+    inputs:
+      buildString:
+        required: true
+        type: string
+    secrets:
+      sonarToken:
+        required: true
+      sonarHostUrl:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.sonarToken }}
+          SONAR_HOST_URL: ${{ secrets.sonarHostUrl }}
+        with:
+          args: >
+            -Dsonar.buildString=${{ inputs.buildString }}
