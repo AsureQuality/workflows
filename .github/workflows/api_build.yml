@@ -1,0 +1,98 @@
+on:
+  workflow_call:
+    inputs:
+      target_environment:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
+      api_core_version:
+        required: false
+        type: string
+        default: latest
+      ecr_repository:
+        required: true
+        type: string
+      ecr_service:
+        required: true
+        type: string
+      tag_latest:
+        required: false
+        type: boolean
+        default: false
+      tag:
+        required: true
+        type: string
+    secrets:
+      ecr_access_key:
+        required: true
+      ecr_secret_access_key:
+        required: true
+    outputs:
+      image:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    environment: development
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+    env:
+      AQ_API_CORE_VERSION: ${{ inputs.api_core_version }}
+      ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+      ECS_SERVICE: ${{ inputs.ecr_service }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials for ECR upload
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ecr_access_key }}
+          aws-secret-access-key: ${{ secrets.ecr_secret_access_key }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          if [ $AQ_API_CORE_VERSION == ""]
+          then
+            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG
+          else
+            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
+          fi
+          docker push $ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG
+          docker push $ECR_REPOSITORY/$ECS_SERVICE:latest
+          echo "Setting output variable image::$ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG"
+          echo "::set-output name=image::$ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG"
+
+      - name: Tag latest
+        id: tag-latest
+        if: ${{ inputs.tag_latest == true }}
+        env:
+          AQ_API_CORE_VERSION: ${{ inputs.api_core_version }}
+          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+          ECS_SERVICE: ${{ inputs.ecr_service }}
+        run: |
+          if [ $AQ_API_CORE_VERSION == ""]
+          then
+            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:latest
+          else
+            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:latest --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
+          fi
+          docker push $ECR_REPOSITORY/$ECS_SERVICE:latest
