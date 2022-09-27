@@ -30,7 +30,9 @@ on:
       ecr_secret_access_key:
         required: true
     outputs:
-      image: ${{ jobs.build.outputs.image }}
+      image:
+        description: The image tag that has been pushed to the ECR. This is basically the merged ecr_repository/ecs_service:tag input variables
+        value: ${{ jobs.build.outputs.image }}
 
 permissions:
   contents: read
@@ -39,7 +41,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    environment: development
+    environment: ${{ inputs.target_environment }}
     outputs:
       image: ${{ steps.build-image.outputs.image }}
     env:
