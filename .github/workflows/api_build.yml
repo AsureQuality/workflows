@@ -30,7 +30,7 @@ on:
       ecr_secret_access_key:
         required: true
     outputs:
-      image:
+      image: ${{ jobs.build.outputs.image }}
 
 permissions:
   contents: read
