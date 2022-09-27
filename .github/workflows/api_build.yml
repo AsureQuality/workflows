@@ -47,7 +47,7 @@ jobs:
     env:
       AQ_API_CORE_VERSION: ${{ inputs.api_core_version }}
       ECR_REPOSITORY: ${{ inputs.ecr_repository }}
-      ECS_SERVICE: ${{ inputs.ecr_service }}
+      ECS_SERVICE: ${{ inputs.ecs_service }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -89,7 +89,7 @@ jobs:
         env:
           AQ_API_CORE_VERSION: ${{ inputs.api_core_version }}
           ECR_REPOSITORY: ${{ inputs.ecr_repository }}
-          ECS_SERVICE: ${{ inputs.ecr_service }}
+          ECS_SERVICE: ${{ inputs.ecs_service }}
         run: |
           if [ $AQ_API_CORE_VERSION == ""]
           then
