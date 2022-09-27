@@ -79,7 +79,6 @@ jobs:
             docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
           fi
           docker push $ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG
-          docker push $ECR_REPOSITORY/$ECS_SERVICE:latest
           echo "Setting output variable image::$ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG"
           echo "::set-output name=image::$ECR_REPOSITORY/$ECS_SERVICE:development-$IMAGE_TAG"
 
