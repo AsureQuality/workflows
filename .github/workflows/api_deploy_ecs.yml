@@ -1,0 +1,63 @@
+on:
+  workflow_call:
+    inputs:
+      target_environment:
+        required: true
+        type: string
+      task_definition:
+        required: true
+        type: string
+      container_name:
+        required: true
+        type: string
+      ecs_service:
+        required: true
+        type: string
+      ecs_cluster:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
+    secrets:
+      deploy_access_key:
+        required: true
+      deploy_secret_access_key:
+        required: true
+      image:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials for ECS Deployment
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.deploy_access_key }}
+          aws-secret-access-key: ${{ secrets.deploy_secret_access_key }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ inputs.task_definition }}
+          container-name: ${{ inputs.container_name }}
+          image: ${{ secrets.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ inputs.ecs_service }}
+          cluster: ${{ inputs.ecs_cluster }}
+          wait-for-service-stability: true
