@@ -45,6 +45,7 @@ jobs:
           aws-access-key-id: ${{ secrets.deploy_access_key }}
           aws-secret-access-key: ${{ secrets.deploy_secret_access_key }}
           aws-region: ${{ secrets.aws_region }}
+          mask-aws-account-id: false
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
