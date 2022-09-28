@@ -24,6 +24,10 @@ on:
       tag:
         required: true
         type: string
+      enable_cache:
+        required: false
+        type: boolean
+        default: true
     secrets:
       ecr_access_key:
         required: true
@@ -62,6 +66,15 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+      - name: Enable Docker Layer Caching
+        if: ${{ inputs.enable_cache }}
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
