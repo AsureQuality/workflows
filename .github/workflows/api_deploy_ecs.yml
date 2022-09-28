@@ -16,6 +16,10 @@ on:
       ecs_cluster:
         required: true
         type: string
+      wait_for_service_stability:
+        required: false
+        type: boolean
+        default: true
 
     secrets:
       deploy_access_key:
@@ -61,4 +65,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ inputs.ecs_service }}
           cluster: ${{ inputs.ecs_cluster }}
-          wait-for-service-stability: true
+          wait-for-service-stability: ${{ inputs.wait_for_service_stability }}
