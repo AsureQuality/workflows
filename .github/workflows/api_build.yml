@@ -58,6 +58,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Configure AWS credentials for ECR upload
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -72,11 +75,11 @@ jobs:
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
-      - name: Enable Docker Layer Caching
-        if: ${{ inputs.enable_cache }}
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
+      # - name: Enable Docker Layer Caching
+      #   if: ${{ inputs.enable_cache }}
+      #   uses: satackey/action-docker-layer-caching@v0.0.11
+      #   # Ignore the failure of a step and avoid terminating the job.
+      #   continue-on-error: true
 
       # - name: Build, tag, and push image to Amazon ECR
       #   id: build-image
@@ -121,6 +124,8 @@ jobs:
           tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:${{ inputs.tag }}
           build-args: ${{ inputs.build_args }}
           context: .
+          cache-from: type=registry,ref=${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:buildcache
+          cache-to: type=registry,ref=${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:buildcache,mode=max
 
       - name: Build with docker action
         id: latest-builder
@@ -131,3 +136,5 @@ jobs:
           tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
           build-args: ${{ inputs.build_args }}
           context: .
+          cache-from: type=registry,ref=${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:buildcache
+          cache-to: type=registry,ref=${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:buildcache,mode=max
