@@ -123,7 +123,7 @@ jobs:
           context: .
 
       - name: Build with docker action
-        id: builder
+        id: latest-builder
         if: ${{ inputs.tag_latest == true }}
         uses: docker/build-push-action@v3
         with:
