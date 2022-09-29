@@ -78,56 +78,56 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ inputs.tag }}
-        run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          if [ $AQ_API_CORE_VERSION == ""]
-          then
-            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG
-          else
-            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
-          fi
-          docker push $ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG
-          echo "Setting output variable image::$ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG"
-          echo "::set-output name=image::$IMAGE_TAG"
+      # - name: Build, tag, and push image to Amazon ECR
+      #   id: build-image
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     IMAGE_TAG: ${{ inputs.tag }}
+      #   run: |
+      #     # Build a docker container and
+      #     # push it to ECR so that it can
+      #     # be deployed to ECS.
+      #     if [ $AQ_API_CORE_VERSION == ""]
+      #     then
+      #       docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG
+      #     else
+      #       docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
+      #     fi
+      #     docker push $ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG
+      #     echo "Setting output variable image::$ECR_REPOSITORY/$ECS_SERVICE:$IMAGE_TAG"
+      #     echo "::set-output name=image::$IMAGE_TAG"
 
-      - name: Tag latest
-        id: tag-latest
-        if: ${{ inputs.tag_latest == true }}
-        env:
-          AQ_API_CORE_VERSION: ${{ inputs.api_core_version }}
-          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
-          ECS_SERVICE: ${{ inputs.ecs_service }}
-        run: |
-          if [ $AQ_API_CORE_VERSION == ""]
-          then
-            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:latest
-          else
-            docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:latest --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
-          fi
-          docker push $ECR_REPOSITORY/$ECS_SERVICE:latest
-
-      # - name: Build with docker action
-      #   id: builder
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     push: true
-      #     tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:${{ inputs.tag }}
-      #     build-args: ${{ inputs.build_args }}
-      #     context: .
-
-      # - name: Build with docker action
-      #   id: latest-builder
+      # - name: Tag latest
+      #   id: tag-latest
       #   if: ${{ inputs.tag_latest == true }}
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     push: true
-      #     tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
-      #     build-args: ${{ inputs.build_args }}
-      #     context: .
+      #   env:
+      #     AQ_API_CORE_VERSION: ${{ inputs.api_core_version }}
+      #     ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+      #     ECS_SERVICE: ${{ inputs.ecs_service }}
+      #   run: |
+      #     if [ $AQ_API_CORE_VERSION == ""]
+      #     then
+      #       docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:latest
+      #     else
+      #       docker build . -t $ECR_REPOSITORY/$ECS_SERVICE:latest --build-arg API_CORE_VERSION=$AQ_API_CORE_VERSION
+      #     fi
+      #     docker push $ECR_REPOSITORY/$ECS_SERVICE:latest
+
+      - name: Build with docker action
+        id: builder
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:${{ inputs.tag }}
+          build-args: ${{ inputs.build_args }}
+          context: .
+
+      - name: Build with docker action
+        id: latest-builder
+        if: ${{ inputs.tag_latest == true }}
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
+          build-args: ${{ inputs.build_args }}
+          context: .
