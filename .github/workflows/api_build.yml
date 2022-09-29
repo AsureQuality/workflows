@@ -10,7 +10,6 @@ on:
       api_core_version:
         required: false
         type: string
-        default: latest
       ecr_repository:
         required: true
         type: string
