@@ -84,8 +84,9 @@ jobs:
           tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:${{ inputs.tag }}
           build-args: ${{ inputs.build_args }}
           context: .
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          no-cache: ${{ !inputs.enable_cache }}
 
       - name: Build Image with Latest Tag
         id: build-with-latest
@@ -96,8 +97,9 @@ jobs:
           tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
           build-args: ${{ inputs.build_args }}
           context: .
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          no-cache: ${{ !inputs.enable_cache }}
 
       - name: Build Image to Target with Ref Tag
         id: build-target-and-tag
@@ -108,9 +110,10 @@ jobs:
           tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:${{ inputs.tag }}
           build-args: ${{ inputs.build_args }}
           context: .
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           target: ${{ inputs.target }}
+          no-cache: ${{ !inputs.enable_cache }}
 
       - name: Build Image to Target with Latest Tag
         id: build-target-with-latest
@@ -121,6 +124,7 @@ jobs:
           tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
           build-args: ${{ inputs.build_args }}
           context: .
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           target: ${{ inputs.target }}
+          no-cache: ${{ !inputs.enable_cache }}
