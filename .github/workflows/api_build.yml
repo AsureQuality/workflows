@@ -35,8 +35,9 @@ on:
         type: string
       runs-on:
         required: false
+        description: a json parsable string containing the target runner labels. eg. "['self-hosted']"
         type: string
-        default: ubuntu-latest
+        default: "['ubuntu-latest']"
     secrets:
       ecr_access_key:
         required: true
@@ -53,7 +54,7 @@ permissions:
 jobs:
   build:
     name: Build
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ${{ fromJson(inputs.runs-on) }}
     environment: ${{ inputs.target_environment }}
     outputs:
       image: ${{ steps.build-image.outputs.image }}

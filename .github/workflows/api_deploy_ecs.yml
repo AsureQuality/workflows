@@ -22,8 +22,9 @@ on:
         default: true
       runs-on:
         required: false
+        description: a json parsable string containing the target runner labels. eg. "['self-hosted']"
         type: string
-        default: ubuntu-latest
+        default: "['ubuntu-latest']"
     secrets:
       deploy_access_key:
         required: true
@@ -40,7 +41,7 @@ permissions:
 jobs:
   deploy:
     name: deploy
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ${{ fromJson(inputs.runs-on) }}
     environment: ${{ inputs.target_environment }}
     steps:
       - name: Checkout
