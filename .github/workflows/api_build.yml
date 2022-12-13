@@ -33,6 +33,10 @@ on:
       target:
         required: false
         type: string
+      runs-on:
+        required: false
+        type: string
+        default: ubuntu-latest
     secrets:
       ecr_access_key:
         required: true
@@ -49,7 +53,7 @@ permissions:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     environment: ${{ inputs.target_environment }}
     outputs:
       image: ${{ steps.build-image.outputs.image }}
