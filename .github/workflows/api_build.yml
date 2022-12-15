@@ -82,7 +82,7 @@ jobs:
 
       - name: Build Image with Ref Tag
         id: build-and-tag
-        if: ${{ !inputs.target }}
+        if: ${{ !inputs.target && inputs.tag_latest == false }}
         uses: docker/build-push-action@v3
         with:
           push: true
@@ -93,13 +93,15 @@ jobs:
           cache-to: type=gha,mode=max
           no-cache: ${{ !inputs.enable_cache }}
 
-      - name: Build Image with Latest Tag
+      - name: Build Image with Ref Tag and Latest Tag
         id: build-with-latest
         if: ${{ !inputs.target && inputs.tag_latest == true }}
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
+          tags: |
+            ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:${{ inputs.tag }}
+            ${{ inputs.ecr_repository }}/${{inputs.ecs_service }}:latest
           build-args: ${{ inputs.build_args }}
           context: .
           cache-from: type=gha
